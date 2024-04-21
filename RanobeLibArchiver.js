@@ -79,39 +79,59 @@ function notify(text) {
             </div>`
 
     fields.appendChild(element)
+
+    setTimeout(() => {
+        fields.removeChild(element)
+    }, 3000)
 }
 
 // Download
+const mangaNumberRegex = new RegExp("/^\\d+(--)")
 async function download(e) {
     notify("Загрузка начата!")
 
     try {
-        const path = window.location.pathname.split("/")
-        const ranobeId = path[path.length - 1]
-
-        // Data
-        const ranobeData = await fetchRanobeData(ranobeId)
-        const slug = ranobeData.slug
-
         // Zip
         const zip = new JSZip()
 
-        // Ranobe Title
-        const label = formatRanobeLabel(ranobeData)
+        // Data
+        const path = window.location.pathname.split("/")
+        const ranobeId = path[path.length - 1]
 
+        let label
+
+        const ranobeData = await fetchRanobeData(ranobeId)
+        console.log(ranobeData)
+        const slug = ranobeId.replace(mangaNumberRegex, "");
+        if ("toast" in ranobeData) {
+            // Ranobe Title
+            label = document.getElementsByClassName("nt_nv")[0].innerText
+            const originalLabel = document.getElementsByClassName("nt_nw")[0].innerText
+            const description = document.getElementsByClassName("ur_p")[0].innerText
+
+            // info.txt
+            const infoText = `${label}\n${originalLabel}\n\n`
+                + `--==[ Описание ]==--\n${description}\n\n`
+                + `--==[ Страница ]==-\nhttps://ranobelib.me/ru/book/${ranobeId}`
+            zip.file(
+                `info.txt`,
+                infoText
+            );
+        } else {
+            // Ranobe Title
+            label = formatRanobeLabel(ranobeData)
+
+            // info.txt
+            const infoText = `${label}\n${ranobeData.name}\n\n`
+                + `--==[ Описание ]==--\n${ranobeData.summary}\n\n`
+                + `--==[ Информация ]==--\nТип: ${ranobeData.type.label}\nВыпуск: ${ranobeData.releaseDate} г.\nСтатус: ${ranobeData.status.label}\nПеревод: ${ranobeData.scanlateStatus.label}\n\n`
+                + `--==[ Страница ]==-\nhttps://ranobelib.me/ru/book/${ranobeData.slug_url}`
+            zip.file(
+                `info.txt`,
+                infoText
+            );
+        }
         logStartDownload(label, slug)
-
-
-        // info.txt
-        const infoText = `${label}\n${ranobeData.name}\n\n`
-            + `--==[ Описание ]==--\n${ranobeData.summary}\n\n`
-            + `--==[ Информация ]==--\nТип: ${ranobeData.type.label}\nВыпуск: ${ranobeData.releaseDate} г.\nСтатус: ${ranobeData.status.label}\nПеревод: ${ranobeData.scanlateStatus.label}\n\n`
-            + `--==[ Страница ]==-\nhttps://ranobelib.me/ru/book/${ranobeData.slug_url}`
-        zip.file(
-            `info.txt`,
-            infoText
-        );
-        logTitleCreate(label, slug)
 
         // Chapters .txt
         const chapters = await fetchRanobeChapters(ranobeId)
