@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         RanobeLib Archiver
 // @namespace    https://github.com/An1by/RanobeLibArchiver
-// @version      1.1
-// @description  Download ranobe from ranobelib.me as archived zip.
+// @version      1.2
+// @description  Ranobe from ranobelib.me -> .zip file of .txt
 // @author       An1by
 // @include      /^https?:\/\/ranobelib\.me\/ru\/book\/[\w\-]+(?:\?.+|#.*)?$/
 // @icon         https://ranobelib.me/images/logo/rl/favicon.ico
@@ -86,7 +86,7 @@ function notify(text) {
 }
 
 // Download
-const mangaNumberRegex = new RegExp("/^\\d+(--)")
+const mangaNumberRegex = new RegExp("^\\d+(--)")
 async function download(e) {
     notify("Загрузка начата!")
 
